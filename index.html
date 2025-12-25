@@ -106,104 +106,124 @@
     <div id="center-photo-container">
         <img id="center" src="center.jpg" alt="Center Heart" onerror="this.src='centre.jpg'">
     </div>
+<script>
+    const messages = [
+        "Thangoo... <span class='heart-text'>&hearts;</span>",
+        "Happy Birthday maa <span class='heart-text'>&hearts;</span>",
+        "Finally its ur day pandi✨",
+        "Ur not only a pandi",
+        "But also a useless waste fellow nd a best friend to me🤣👊",
+        "Thank you for being with me all tym",
+        "IK we fight a lot but never made a decision to give up on our spcl bond",
+        "Honestly grateful for that🥺",
+        "You have been there in my thick nd thin phases of my lyf meri thangoo 🐶😚🤣",
+        "Never ask me the best expensive gift u can never afford it😂🤷‍♂️",
+        "Have a beautiful nd wonderful days ahead",
+        "Ik ur doing good come on idiot u can💪✨endless joy,love,Happiness everything you deserve potti",
+        "💝"
+    ];
 
-    <script>
-        const messages = [
-            "Thangoo... <span class='heart-text'>&hearts;</span>",
-            "Happy Birthday maa <span class='heart-text'>&hearts;</span>",
-            "Finally its ur day pandi✨",
-            "Ur not only a pandi",
-            "But also a useless waste fellow nd a best friend to me🤣👊",
-            "Thank you for being with me all tym",
-            "IK we fight a lot but never made a decision to give up on our spcl bond",
-            "Honestly grateful for that🥺",
-            "You have been there in my thick nd thin phases of my lyf meri thangoo 🐶😚🤣",
-            "Never ask me the best expensive gift u can never afford it😂🤷‍♂️",
-            "Have a beautiful nd wonderful days ahead",
-            "Ik ur doing good come on idiot u can💪✨endless joy,love,Happiness everything you deserve potti",
-            "💝"
-        ];
+    const photos = [
+        "photo1.jpg","photo2.jpg","photo3.jpg","photo4.jpg","photo5.jpg",
+        "photo6.jpg","photo7.jpg","photo8.jpg","photo9.jpg","photo10.jpg",
+        "photo11.jpg","photo12.jpg","photo13.jpg","photo14.jpg","photo15.jpg"
+    ];
 
-        // ADDED ALL 15 PHOTOS HERE
-        const photos = [
-            "photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg",
-            "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg", "photo10.jpg",
-            "photo11.jpg", "photo12.jpg", "photo13.jpg", "photo14.jpg", "photo15.jpg"
-        ];
+    const consoleContainer = document.getElementById('console-container');
+    const centerPhotoContainer = document.getElementById('center-photo-container');
+    const audio = document.getElementById('bg-audio');
 
-        const consoleContainer = document.getElementById('console-container');
-        const centerPhotoContainer = document.getElementById('center-photo-container');
-        
-        let lineIndex = 0;
-        let charIndex = 0;
-        let currentLineElement = null;
-        let currentLineChars = [];
+    let lineIndex = 0;
+    let charIndex = 0;
+    let currentLineElement = null;
+    let currentLineChars = [];
+    let audioStarted = false;
 
-        function typeWriter() {
-            if (lineIndex < messages.length) {
-                if (!currentLineElement) {
-                    currentLineElement = document.createElement('div');
-                    currentLineElement.classList.add('line');
-                    currentLineElement.classList.add('cursor');
-                    consoleContainer.appendChild(currentLineElement);
-                    
-                    const rawLine = messages[lineIndex];
-                    
-                    // FIX: If line has HTML tag, just show it immediately to avoid broken text
-                    if (rawLine.includes('<')) {
-                        currentLineElement.innerHTML = rawLine;
-                        currentLineElement.classList.remove('cursor');
-                        currentLineElement = null;
-                        lineIndex++;
-                        setTimeout(typeWriter, 1000); 
-                        return; // Skip the char-by-char typing for this line
-                    } else {
-                        currentLineChars = Array.from(rawLine);
-                    }
-                }
+    function typeWriter() {
+        // 🔊 Start audio once
+        if (!audioStarted) {
+            audio.play().catch(() => {
+                console.log("Audio autoplay blocked until user interaction");
+            });
+            audioStarted = true;
+        }
 
-                if (charIndex < currentLineChars.length) {
-                    currentLineElement.textContent += currentLineChars[charIndex];
-                    charIndex++;
-                    setTimeout(typeWriter, 50);
-                } else {
+        if (lineIndex < messages.length) {
+            if (!currentLineElement) {
+                currentLineElement = document.createElement('div');
+                currentLineElement.classList.add('line', 'cursor');
+                consoleContainer.appendChild(currentLineElement);
+
+                const rawLine = messages[lineIndex];
+
+                // If line contains HTML, show instantly
+                if (rawLine.includes('<')) {
+                    currentLineElement.innerHTML = rawLine;
                     currentLineElement.classList.remove('cursor');
                     currentLineElement = null;
-                    charIndex = 0;
                     lineIndex++;
-                    currentLineChars = [];
-                    setTimeout(typeWriter, 800); 
+                    setTimeout(typeWriter, 1000);
+                    return;
+                } else {
+                    currentLineChars = Array.from(rawLine);
                 }
-            } else {
-                revealCenterHeart();
             }
+
+            if (charIndex < currentLineChars.length) {
+                currentLineElement.textContent += currentLineChars[charIndex];
+                charIndex++;
+                setTimeout(typeWriter, 50);
+            } else {
+                currentLineElement.classList.remove('cursor');
+                currentLineElement = null;
+                charIndex = 0;
+                lineIndex++;
+                currentLineChars = [];
+                setTimeout(typeWriter, 800);
+            }
+        } else {
+            revealCenterHeart();
+            fadeOutAudio();
         }
+    }
 
-        function revealCenterHeart() {
-            centerPhotoContainer.classList.add('show-center');
-        }
+    function revealCenterHeart() {
+        centerPhotoContainer.classList.add('show-center');
+    }
 
-        function createFloatingHeart() {
-            const container = document.getElementById('floating-container');
-            const heart = document.createElement('div');
-            heart.classList.add('floating-heart');
+    function fadeOutAudio() {
+        let volume = 1;
+        const fade = setInterval(() => {
+            volume -= 0.05;
+            if (volume <= 0) {
+                audio.pause();
+                audio.currentTime = 0;
+                clearInterval(fade);
+            } else {
+                audio.volume = volume;
+            }
+        }, 150);
+    }
 
-            const randomPhoto = photos[Math.floor(Math.random() * photos.length)];
-            heart.style.backgroundImage = `url('${randomPhoto}')`;
+    function createFloatingHeart() {
+        const container = document.getElementById('floating-container');
+        const heart = document.createElement('div');
+        heart.classList.add('floating-heart');
 
-            heart.style.left = Math.random() * 95 + "vw";
-            heart.style.animationDuration = (Math.random() * 5 + 8) + "s"; 
-            heart.style.transform = `scale(${Math.random() * 0.5 + 0.8})`; 
+        const randomPhoto = photos[Math.floor(Math.random() * photos.length)];
+        heart.style.backgroundImage = `url('${randomPhoto}')`;
 
-            container.appendChild(heart);
+        heart.style.left = Math.random() * 95 + "vw";
+        heart.style.animationDuration = (Math.random() * 5 + 8) + "s";
+        heart.style.transform = `scale(${Math.random() * 0.5 + 0.8})`;
 
-            setTimeout(() => {
-                heart.remove();
-            }, 13000);
-        }
+        container.appendChild(heart);
 
-        setInterval(createFloatingHeart, 800); 
-        typeWriter();
-    </script>
+        setTimeout(() => heart.remove(), 13000);
+    }
+
+    setInterval(createFloatingHeart, 800);
+    typeWriter();
+</script>
 </body>
 </html>
