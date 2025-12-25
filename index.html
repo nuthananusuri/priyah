@@ -12,31 +12,37 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            /* FIX: Allow scrolling and start from top */
+            justify-content: flex-start; 
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            /* FIX: Enable vertical scroll, hide horizontal */
+            overflow-y: auto; 
+            overflow-x: hidden;
             position: relative;
+            padding-top: 10vh; /* Start text a bit down */
+            padding-bottom: 10vh; /* Space at bottom for scrolling */
         }
 
         #console-container {
-            width: 80%;
+            width: 85%; /* Slightly wider for mobile */
             max-width: 600px;
             text-align: left;
             z-index: 20;
             position: relative;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            min-height: 50px;
+            margin-bottom: 50px; /* Extra space at bottom */
         }
 
         .line {
             display: block;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
+            margin-bottom: 20px; /* More space between lines */
+            font-size: 1.1rem; /* Readable size */
             font-weight: bold;
             opacity: 0;
             animation: fadeIn 0.5s forwards;
-            line-height: 1.5;
+            line-height: 1.6;
+            word-wrap: break-word; /* Prevents text cutting off */
         }
 
         .heart-text {
@@ -44,8 +50,9 @@
             font-weight: bold;
         }
 
+        /* CENTER PHOTO - FIXED POSITION */
         #center-photo-container {
-            position: absolute;
+            position: fixed; /* Stays in center even when scrolling */
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
@@ -70,8 +77,9 @@
             transform: translate(-50%, -50%) scale(1.2) !important;
         }
 
+        /* BACKGROUND HEARTS - FIXED POSITION */
         .floating-heart {
-            position: absolute;
+            position: fixed; /* Floating hearts stay in background */
             width: 50px;
             height: 50px;
             background-size: cover;
@@ -84,8 +92,6 @@
 
         @keyframes floatUp {
             0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
-            20% { opacity: 0.6; }
-            80% { opacity: 0.6; }
             100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
         }
 
@@ -125,7 +131,7 @@
             "💝"
         ];
 
-        // ADDED ALL 15 PHOTOS HERE
+        // Ensure these match your filenames exactly (lowercase/uppercase matters)
         const photos = [
             "photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg",
             "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg", "photo10.jpg",
@@ -150,14 +156,16 @@
                     
                     const rawLine = messages[lineIndex];
                     
-                    // FIX: If line has HTML tag, just show it immediately to avoid broken text
+                    // Instant print for lines with HTML to avoid bugs
                     if (rawLine.includes('<')) {
                         currentLineElement.innerHTML = rawLine;
                         currentLineElement.classList.remove('cursor');
                         currentLineElement = null;
                         lineIndex++;
+                        // Scroll to bottom as we type
+                        window.scrollTo(0, document.body.scrollHeight);
                         setTimeout(typeWriter, 1000); 
-                        return; // Skip the char-by-char typing for this line
+                        return;
                     } else {
                         currentLineChars = Array.from(rawLine);
                     }
@@ -166,6 +174,8 @@
                 if (charIndex < currentLineChars.length) {
                     currentLineElement.textContent += currentLineChars[charIndex];
                     charIndex++;
+                    // Auto-scroll to keep latest text in view
+                    window.scrollTo(0, document.body.scrollHeight);
                     setTimeout(typeWriter, 50);
                 } else {
                     currentLineElement.classList.remove('cursor');
