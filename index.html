@@ -19,14 +19,13 @@
             position: relative;
         }
 
-        /* The Typing Text Container */
         #console-container {
             width: 80%;
             max-width: 600px;
             text-align: left;
-            z-index: 20; /* Text sits ON TOP of the photo */
+            z-index: 20;
             position: relative;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* Shadow makes text pop against photo */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             min-height: 50px;
         }
 
@@ -42,9 +41,9 @@
 
         .heart-text {
             color: #ff4d6d;
+            font-weight: bold;
         }
 
-        /* THE CENTER HEART PHOTO (Hidden Initially) */
         #center-photo-container {
             position: absolute;
             top: 50%;
@@ -52,37 +51,33 @@
             transform: translate(-50%, -50%) scale(0.8);
             width: 350px;
             height: 350px;
-            z-index: 10; /* Behind the text */
-            opacity: 0; /* Invisible start */
+            z-index: 10;
+            opacity: 0;
             transition: all 2s ease-in-out;
-            pointer-events: none; /* Let clicks pass through */
+            pointer-events: none;
         }
 
         #center-photo {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* Heart Shape Clip */
             clip-path: path('M175,59.5 C108.5,-59.5 -59.5,87.5 175,304.5 C409.5,87.5 241.5,-59.5 175,59.5 Z');
             box-shadow: 0 0 20px rgba(255, 77, 109, 0.5);
         }
 
-        /* Class to trigger the fade-in */
         .show-center {
-            opacity: 0.35 !important; /* Light occupancy (35% visible) */
+            opacity: 0.35 !important;
             transform: translate(-50%, -50%) scale(1.2) !important;
         }
 
-        /* FLOATING BACKGROUND PHOTOS */
         .floating-heart {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 50px;
+            height: 50px;
             background-size: cover;
             background-position: center;
             opacity: 0.6;
             z-index: 1;
-            /* Heart Shape for floating items */
             clip-path: path('M25,8.5 C15.5,-8.5 -8.5,12.5 25,43.5 C58.5,12.5 34.5,-8.5 25,8.5 Z');
             animation: floatUp linear infinite;
         }
@@ -106,16 +101,13 @@
 <body>
 
     <div id="floating-container"></div>
-
     <div id="console-container"></div>
 
     <div id="center-photo-container">
-        <img id="center-photo" src="centre-photo.jpg" alt="Center Heart">
+        <img id="center-photo" src="center.jpg" alt="Center Heart" onerror="this.src='photo1.jpg'">
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        
         const messages = [
             "Thangoo... <span class='heart-text'>&hearts;</span>",
             "Happy Birthday maa!!! <span class='heart-text'>&hearts;</span>",
@@ -133,13 +125,12 @@
             "💝"
         ];
 
-        // PHOTOS FOR BACKGROUND HEARTS
+        // ADDED ALL 15 PHOTOS HERE
         const photos = [
-            "photo1.jpg", 
-            "photo2.jpg", 
-            "photo3.jpg" 
+            "photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg",
+            "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg", "photo10.jpg",
+            "photo11.jpg", "photo12.jpg", "photo13.jpg", "photo14.jpg", "photo15.jpg"
         ];
-        // ---------------------
 
         const consoleContainer = document.getElementById('console-container');
         const centerPhotoContainer = document.getElementById('center-photo-container');
@@ -157,28 +148,26 @@
                     currentLineElement.classList.add('cursor');
                     consoleContainer.appendChild(currentLineElement);
                     
-                    // Safe emoji splitting
                     const rawLine = messages[lineIndex];
+                    
+                    // FIX: If line has HTML tag, just show it immediately to avoid broken text
                     if (rawLine.includes('<')) {
-                        currentLineChars = [rawLine]; // Treat HTML tags as one chunk
+                        currentLineElement.innerHTML = rawLine;
+                        currentLineElement.classList.remove('cursor');
+                        currentLineElement = null;
+                        lineIndex++;
+                        setTimeout(typeWriter, 1000); 
+                        return; // Skip the char-by-char typing for this line
                     } else {
-                        currentLineChars = Array.from(rawLine); // Split correctly for emojis
+                        currentLineChars = Array.from(rawLine);
                     }
                 }
 
                 if (charIndex < currentLineChars.length) {
-                    const char = currentLineChars[charIndex];
-                    
-                    if (char.startsWith('<')) {
-                        currentLineElement.innerHTML = char;
-                    } else {
-                        currentLineElement.textContent += char;
-                    }
-                    
+                    currentLineElement.textContent += currentLineChars[charIndex];
                     charIndex++;
-                    setTimeout(typeWriter, 50); // Typing speed
+                    setTimeout(typeWriter, 50);
                 } else {
-                    // Line finished
                     currentLineElement.classList.remove('cursor');
                     currentLineElement = null;
                     charIndex = 0;
@@ -187,7 +176,6 @@
                     setTimeout(typeWriter, 800); 
                 }
             } else {
-                // WHEN DONE: Reveal the Center Heart
                 revealCenterHeart();
             }
         }
@@ -196,17 +184,14 @@
             centerPhotoContainer.classList.add('show-center');
         }
 
-        // --- FLOATING PHOTO HEARTS LOGIC ---
         function createFloatingHeart() {
             const container = document.getElementById('floating-container');
             const heart = document.createElement('div');
             heart.classList.add('floating-heart');
 
-            // Pick a random photo
             const randomPhoto = photos[Math.floor(Math.random() * photos.length)];
             heart.style.backgroundImage = `url('${randomPhoto}')`;
 
-            // Random positioning
             heart.style.left = Math.random() * 95 + "vw";
             heart.style.animationDuration = (Math.random() * 5 + 8) + "s"; 
             heart.style.transform = `scale(${Math.random() * 0.5 + 0.8})`; 
@@ -218,12 +203,8 @@
             }, 13000);
         }
 
-        // Start floating hearts immediately
-        setInterval(createFloatingHeart, 600); 
-
-        // Start typing
+        setInterval(createFloatingHeart, 800); 
         typeWriter();
-
     </script>
 </body>
 </html>
