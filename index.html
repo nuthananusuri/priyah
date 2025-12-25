@@ -12,31 +12,63 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; 
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            overflow-y: auto; 
+            overflow-x: hidden;
             position: relative;
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+        }
+
+        /* OVERLAY FOR MUSIC PERMISSION */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+        }
+
+        #start-overlay h1 {
+            font-size: 2rem;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         #console-container {
-            width: 80%;
+            width: 85%;
             max-width: 600px;
             text-align: left;
             z-index: 20;
             position: relative;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            min-height: 50px;
+            margin-bottom: 50px;
         }
 
         .line {
             display: block;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
             font-weight: bold;
             opacity: 0;
             animation: fadeIn 0.5s forwards;
-            line-height: 1.5;
+            line-height: 1.6;
+            word-wrap: break-word;
         }
 
         .heart-text {
@@ -45,19 +77,19 @@
         }
 
         #center-photo-container {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
-            width: 1080px;
-            height: 1920px;
+            width: 350px;
+            height: 350px;
             z-index: 10;
             opacity: 0;
             transition: all 2s ease-in-out;
             pointer-events: none;
         }
 
-        #center {
+        #center-photo {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -71,7 +103,7 @@
         }
 
         .floating-heart {
-            position: absolute;
+            position: fixed;
             width: 50px;
             height: 50px;
             background-size: cover;
@@ -84,8 +116,6 @@
 
         @keyframes floatUp {
             0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
-            20% { opacity: 0.6; }
-            80% { opacity: 0.6; }
             100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
         }
 
@@ -100,17 +130,26 @@
 </head>
 <body>
 
+    <div id="start-overlay" onclick="startSurprise()">
+        <h1>Tap to Open Gift 🎁</h1>
+        <p>(Turn up your volume! 🔊)</p>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="song.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="floating-container"></div>
     <div id="console-container"></div>
 
     <div id="center-photo-container">
-        <img id="center" src="center.jpg" alt="Center Heart" onerror="this.src='centre.jpg'">
+        <img id="center-photo" src="center.jpg" alt="Center Heart" onerror="this.src='photo1.jpg'">
     </div>
 
     <script>
         const messages = [
             "Thangoo... <span class='heart-text'>&hearts;</span>",
-            "Happy Birthday maa <span class='heart-text'>&hearts;</span>",
+            "Happy Birthday maa!!! <span class='heart-text'>&hearts;</span>",
             "Finally its ur day pandi✨",
             "Ur not only a pandi",
             "But also a useless waste fellow nd a best friend to me🤣👊",
@@ -120,11 +159,11 @@
             "You have been there in my thick nd thin phases of my lyf meri thangoo 🐶😚🤣",
             "Never ask me the best expensive gift u can never afford it😂🤷‍♂️",
             "Have a beautiful nd wonderful days ahead",
-            "Ik ur doing good come on idiot u can💪✨endless joy,love,Happiness everything you deserve potti",
+            "Ik ur doing good come on idiot u can💪✨endless joy,love,",
+            "Happiness everything you deserve potti",
             "💝"
         ];
 
-        // ADDED ALL 15 PHOTOS HERE
         const photos = [
             "photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg",
             "photo6.jpg", "photo7.jpg", "photo8.jpg", "photo9.jpg", "photo10.jpg",
@@ -133,11 +172,26 @@
 
         const consoleContainer = document.getElementById('console-container');
         const centerPhotoContainer = document.getElementById('center-photo-container');
+        const overlay = document.getElementById('start-overlay');
+        const music = document.getElementById('bg-music');
         
         let lineIndex = 0;
         let charIndex = 0;
         let currentLineElement = null;
         let currentLineChars = [];
+
+        // Function called when user taps the screen
+        function startSurprise() {
+            // 1. Hide the overlay
+            overlay.style.display = 'none';
+            
+            // 2. Play Music
+            music.play().catch(error => console.log("Music blocked:", error));
+
+            // 3. Start Animation
+            setInterval(createFloatingHeart, 800); 
+            typeWriter();
+        }
 
         function typeWriter() {
             if (lineIndex < messages.length) {
@@ -149,14 +203,14 @@
                     
                     const rawLine = messages[lineIndex];
                     
-                    // FIX: If line has HTML tag, just show it immediately to avoid broken text
                     if (rawLine.includes('<')) {
                         currentLineElement.innerHTML = rawLine;
                         currentLineElement.classList.remove('cursor');
                         currentLineElement = null;
                         lineIndex++;
+                        window.scrollTo(0, document.body.scrollHeight);
                         setTimeout(typeWriter, 1000); 
-                        return; // Skip the char-by-char typing for this line
+                        return;
                     } else {
                         currentLineChars = Array.from(rawLine);
                     }
@@ -165,6 +219,7 @@
                 if (charIndex < currentLineChars.length) {
                     currentLineElement.textContent += currentLineChars[charIndex];
                     charIndex++;
+                    window.scrollTo(0, document.body.scrollHeight);
                     setTimeout(typeWriter, 50);
                 } else {
                     currentLineElement.classList.remove('cursor');
@@ -201,9 +256,6 @@
                 heart.remove();
             }, 13000);
         }
-
-        setInterval(createFloatingHeart, 800); 
-        typeWriter();
     </script>
 </body>
 </html>
